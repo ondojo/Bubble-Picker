@@ -3,7 +3,7 @@ package com.igalata.bubblepicker.rendering
 import android.content.Context
 import android.graphics.PixelFormat
 import android.opengl.GLSurfaceView
-import android.support.annotation.ColorInt
+import androidx.annotation.ColorInt
 import android.util.AttributeSet
 import android.view.MotionEvent
 import com.igalata.bubblepicker.BubblePickerListener
@@ -102,6 +102,12 @@ class BubblePicker : GLSurfaceView {
         }
 
         return true
+    }
+
+    fun addedItem(position: Int) {
+        val mAdapter = adapter ?: return
+        val item = mAdapter.getItem(position)
+        renderer.addItem(item);
     }
 
     private fun release() = postDelayed({ renderer.release() }, 0)
