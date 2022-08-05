@@ -29,7 +29,7 @@ allprojects {
 Add the dependency:
 ```Groovy
 dependencies {
-	compile 'com.github.igalata:Bubble-Picker:v0.2.4'
+	implementation 'com.github.ondojo:bubblepicker:v0.2.6'
 }
 ```
 

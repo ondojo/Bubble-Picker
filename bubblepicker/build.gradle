@@ -1,5 +1,17 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'maven-publish'
+
+def githubProperties = new Properties()
+githubProperties.load(new FileInputStream(rootProject.file("github.properties")))  
+
+def getVersionName = { ->
+    return "0.2.6"
+}
+
+def getArtificatId = { ->
+    return "bubblepicker"
+}
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -24,13 +36,40 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile "com.android.support:appcompat-v7:$supportLibVersion"
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "com.android.support:appcompat-v7:$supportLibVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    compile files('libs/jbox2d-library-2.1.2.2.jar')
-    compile files('libs/slf4j-api-1.7.22.jar')
+    implementation files('libs/jbox2d-library-2.1.2.2.jar')
+    implementation files('libs/slf4j-api-1.7.22.jar')
 }
 repositories {
     mavenCentral()
+}
+
+publishing {
+    publications {
+        github(MavenPublication) {
+            groupId 'com.github.ondojo'
+            artifactId getArtificatId()
+            version getVersionName()
+            artifact("$buildDir/outputs/aar/${getArtificatId()}-release.aar")
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            /** Configure path of your package repository on Github
+             *  Replace GITHUB_USERID with your/organisation Github userID and REPOSITORY with the repository name on GitHub
+             */
+            url = uri("https://maven.pkg.github.com/ondojo/Bubble-Picker")
+
+            credentials {
+                /**Create github.properties in root project folder file with gpr.usr=GITHUB_USER_ID  & gpr.key=PERSONAL_ACCESS_TOKEN**/
+                username = githubProperties['gpr.usr'] ?: System.getenv("GPR_USER")
+                password = githubProperties['gpr.key'] ?: System.getenv("GPR_API_KEY")
+            }
+        }
+    }
 }
