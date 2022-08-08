@@ -52,6 +52,17 @@ data class Item(val pickerItem: PickerItem, val circleBody: CircleBody) {
                         it.startColor, it.endColor, Shader.TileMode.CLAMP)
             }
         }
+    private val selectedGradient: LinearGradient?
+        get() {
+            return pickerItem.selectedGradient?.let {
+                val horizontal = it.direction == BubbleGradient.HORIZONTAL
+                LinearGradient(if (horizontal) 0f else bitmapSize / 2f,
+                        if (horizontal) bitmapSize / 2f else 0f,
+                        if (horizontal) bitmapSize else bitmapSize / 2f,
+                        if (horizontal) bitmapSize / 2f else bitmapSize,
+                        it.startColor, it.endColor, Shader.TileMode.CLAMP)
+            }
+        }
 
     fun drawItself(programId: Int, index: Int, scaleX: Float, scaleY: Float) {
         glActiveTexture(GL_TEXTURE)
@@ -77,7 +88,7 @@ data class Item(val pickerItem: PickerItem, val circleBody: CircleBody) {
         if (isSelected) drawImage(canvas)
         drawBackground(canvas, isSelected)
         drawIcon(canvas)
-        drawText(canvas)
+        drawText(canvas, isSelected)
 
         return bitmap
     }
@@ -87,15 +98,20 @@ data class Item(val pickerItem: PickerItem, val circleBody: CircleBody) {
         bgPaint.style = Paint.Style.FILL
         pickerItem.color?.let { bgPaint.color = pickerItem.color!! }
         pickerItem.gradient?.let { bgPaint.shader = gradient }
-        if (withImage) bgPaint.alpha = (pickerItem.overlayAlpha * 255).toInt()
+        if (withImage) {
+            pickerItem.selectedColor?.let { bgPaint.color = pickerItem.selectedColor!! }
+            pickerItem.selectedGradient?.let { bgPaint.shader = selectedGradient }
+        }
         canvas.drawRect(0f, 0f, bitmapSize, bitmapSize, bgPaint)
     }
 
-    private fun drawText(canvas: Canvas) {
+    private fun drawText(canvas: Canvas, isSelected: Boolean) {
         if (pickerItem.title == null || pickerItem.textColor == null) return
 
+        val textColor = if (isSelected) pickerItem.selectedTextColor ?: pickerItem.textColor!! else pickerItem.textColor!!
+
         val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = pickerItem.textColor!!
+            color = textColor
             textSize = pickerItem.textSize
             typeface = pickerItem.typeface
         }
